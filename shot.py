@@ -105,7 +105,7 @@ class Board:
         t = (p1-p3).det(p3-p4) / (p1-p2).det(p3-p4)
         return t
 
-    def visualize(self, s, t, pts):
+    def visualize(self, s=None, t=None, pts=[]):
         
         hlines(0, 0, self.w)
         hlines(self.h, 0, self.w)
@@ -119,35 +119,46 @@ class Board:
         if self.cue2:
           plot(self.cue2.x, self.cue2.y,'kX')
 
-        pts.insert(0, s)
-        pts.append(t)
-
-
-        x = [p.x for p in pts]
-        y = [p.y for p in pts]
-
-        plot(x,y,'-')
-        c1 = Circle((s.x, s.y), 3,color='r')
-        c2 = Circle((t.x, t.y), 3,color='g')
-
-
-        gca().add_patch(c1)
-        gca().add_patch(c2)
         gca().set_aspect('equal')
 
-        show()
+        if s is not None:
+          c1 = Circle((s.x, s.y), 3,color='r')
+          c2 = Circle((t.x, t.y), 3,color='g')
+
+          gca().add_patch(c1)
+          gca().add_patch(c2)
+      
+          pts.insert(0, s)
+          pts.append(t)
+
+          x = [p.x for p in pts]
+          y = [p.y for p in pts]
+
+          plot(x,y,'-')
+
 
         
 
 if __name__ == '__main__':
     #Define a new board
     b = Board()
+
+    b.visualize()
+    title('Click yellow ball positions')
+    pts = ginput(2)
     
-    s = Point(10,10)
-    t = Point(50,40)
+
+    s = Point(pts[0][0], pts[0][1])
+    t = Point(pts[1][0], pts[1][1])
+
+    #s = Point(10,10)
+    #t = Point(50,40)
 
     print(s,t)
-    pt  = b.findShot(s,t, edge='L')
+    pt  = b.findShot(s,t, edge='D')
+    print(s,t,pt)
 
     #plot this point
     b.visualize(s,t, [pt])
+    draw()
+    show()
