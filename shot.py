@@ -66,37 +66,56 @@ class Board:
     Estimate a shot when feasible given two shots and a series of edges encoded as L, U, R, D
     Returns: Point on the cushion to hit or None if a shot does not exist
     '''
-    def findShot(self, s, t, edge = 'L'):
+    def findShot(self, s, t, edges = ['L']):
 
-        if edge == 'L':
-            img = s.image(mx = 0)
-            p1 = Point(0,0)
-            p2 = Point(0,self.h)
+      # We hit the last cushion already so it's a direct hit
+      if not edges:
+        return [t]
 
-        elif edge == 'R':
-            img = s.image(mx = self.w)
-            p1 = Point(self.w,0)
-            p2 = Point(self.w,self.h)
+      #Compute image w.r.t. the first edge
+      edge = edges[0]
 
-        elif edge == 'U':
-            img = s.image(my = self.h)
-            p1 = Point(0,self.h)
-            p2 = Point(self.w,self.h)
+      if edge == 'L':
+        img = s.image(mx = 0)
+        p1 = Point(0,0)
+        p2 = Point(0,self.h)
 
-        elif edge == 'D':
-            img = s.image(my = 0)
-            p1 = Point(0,0)
-            p2 = Point(self.w,0)
+      elif edge == 'R':
+        img = s.image(mx = self.w)
+        p1 = Point(self.w,0)
+        p2 = Point(self.w,self.h)
 
-        #Find the intersection point between this edge and the line joining image and y
-        # reference : https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line_segment 
+      elif edge == 'U':
+        img = s.image(my = self.h)
+        p1 = Point(0,self.h)
+        p2 = Point(self.w,self.h)
 
-        t = self.intersect(p1, p2, img, t)
+      elif edge == 'D':
+        img = s.image(my = 0)
+        p1 = Point(0,0)
+        p2 = Point(self.w,0)
 
-        if t>=0 and t<=1:
-            return p1 + t*(p2-p1)
-        else:
-            return None
+      #Look ahead shots
+      la_shots = self.findShot(img, t, edges = edges[1:])
+
+      #Find the intersection point between this edge and the line joining image and y
+      # reference : https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line_segment 
+
+      if la_shots is None:
+        return None
+
+      #print("Look ahead shots:", list(map(str,la_shots)))
+      #print("interesect:",edge, p1,p2,img, la_shots[0])
+      a = self.intersect(p1, p2, img, la_shots[0])
+
+      pts = []
+      if a>=0 and a<=1:
+          pts.append(p1 + a*(p2-p1))
+          pts.extend(la_shots)
+      else:
+          return None
+
+      return pts
         
     #Given two lines joining points (p1, p2) and (p3, p4). Find the intercept on the first line where they interesect
 
@@ -122,19 +141,23 @@ class Board:
         gca().set_aspect('equal')
 
         if s is not None:
-          c1 = Circle((s.x, s.y), 3,color='r')
-          c2 = Circle((t.x, t.y), 3,color='g')
+          c1 = Circle((s.x, s.y), 2,color='r')
+          c2 = Circle((t.x, t.y), 2,color='g')
 
           gca().add_patch(c1)
           gca().add_patch(c2)
-      
-          pts.insert(0, s)
-          pts.append(t)
+        
+          valid = True
+          if pts:
+            pts.insert(0, s)
+            pts.append(t)
 
-          x = [p.x for p in pts]
-          y = [p.y for p in pts]
+            x = [p.x for p in pts]
+            y = [p.y for p in pts]
 
-          plot(x,y,'-')
+            plot(x,y,'-')
+          else:
+            title("Sorry no valid shot!")
 
 
         
@@ -154,11 +177,9 @@ if __name__ == '__main__':
     #s = Point(10,10)
     #t = Point(50,40)
 
-    print(s,t)
-    pt  = b.findShot(s,t, edge='D')
-    print(s,t,pt)
+    pt = b.findShot(s,t, edges=['U','R','D'])
 
     #plot this point
-    b.visualize(s,t, [pt])
+    b.visualize(s,t, pt)
     draw()
     show()
