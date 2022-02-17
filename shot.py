@@ -150,7 +150,6 @@ class Board:
           valid = True
           if pts:
             pts.insert(0, s)
-            pts.append(t)
 
             x = [p.x for p in pts]
             y = [p.y for p in pts]
@@ -177,7 +176,7 @@ if __name__ == '__main__':
     #s = Point(10,10)
     #t = Point(50,40)
 
-    pt = b.findShot(s,t, edges=['U','R','D'])
+    pt = b.findShot(s,t, edges=['D','R','U'])
 
     #plot this point
     b.visualize(s,t, pt)
