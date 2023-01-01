@@ -1,4 +1,4 @@
 
 ## List options for different shots
 
-![options for shots](options.png)
+![options for shots](https://github.com/algoseer/pool-ncushion-finder/blob/master/options.png)
